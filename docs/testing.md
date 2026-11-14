@@ -673,6 +673,11 @@ the x64 server, packages the Visual Studio extension using
 from the VSIX. CI validates packaging without uploading artifacts; the release
 workflow packages the Visual Studio VSIX with both x64 and ARM64 servers.
 
+CI also runs `pwsh -NoProfile -File tests/release-symbols/test.ps1` to check symbol
+archive contents, build identity, executable/PDB hashes, and missing-file failures.
+The release workflow preserves symbols for both NativeAOT and self-contained
+fallback builds and attaches separate per-architecture symbol archives.
+
 ---
 
 ## 10. Troubleshooting

@@ -74,15 +74,15 @@ jobs:
         run: >
           dotnet publish src/Midl.Cli -c Release -r ${{ matrix.rid }}
           -p:PublishAot=true
-          -p:StripSymbols=true
+          -p:StripSymbols=false
           -p:IlcOptimizationPreference=Speed
           ${{ matrix.ilcInstructionSet && format('-p:IlcInstructionSet={0}', matrix.ilcInstructionSet) || '' }}
           -p:IlcFoldIdenticalMethodBodies=true
           -p:InvariantGlobalization=true
           -p:StackTraceSupport=false
           -p:UseSystemResourceKeys=true
-          -p:DebugType=none
-          -p:DebugSymbols=false
+          -p:DebugType=portable
+          -p:DebugSymbols=true
           -p:Version=${{ steps.version.outputs.VERSION }}
           -p:AssemblyVersion=${{ steps.version.outputs.ASM_VERSION }}
           -p:FileVersion=${{ steps.version.outputs.ASM_VERSION }}
@@ -95,19 +95,40 @@ jobs:
           --self-contained
           -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:DebugType=portable
+          -p:DebugSymbols=true
           -p:Version=${{ steps.version.outputs.VERSION }}
           -p:AssemblyVersion=${{ steps.version.outputs.ASM_VERSION }}
           -p:FileVersion=${{ steps.version.outputs.ASM_VERSION }}
           -o publish/${{ matrix.rid }}
 
-      - name: Zip artifacts
-        run: Compress-Archive -Path publish/${{ matrix.rid }}/* -DestinationPath publish/winmidl-${{ matrix.rid }}.zip
+      - name: Package matching debug symbols
+        shell: pwsh
+        run: |
+          ./scripts/package-symbols.ps1 -PublishPath publish/${{ matrix.rid }} `
+            -Runtime "${{ matrix.rid }}" -Version "${{ steps.version.outputs.VERSION }}" `
+            -Commit "${{ github.sha }}" `
+            -BuildKind "${{ steps.aot.outcome == 'success' && 'NativeAOT' || 'SelfContained' }}" `
+            -OutputPath publish/winmidl-${{ matrix.rid }}-symbols.zip
+
+      - name: Zip artifacts (without symbols)
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem publish/${{ matrix.rid }} -File | Where-Object Extension -ne '.pdb'
+          Compress-Archive -Path $files.FullName -DestinationPath publish/winmidl-${{ matrix.rid }}.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: winmidl-${{ matrix.rid }}
           path: publish/winmidl-${{ matrix.rid }}.zip
+
+      - name: Upload debug symbols
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winmidl-${{ matrix.rid }}-symbols
+          path: publish/winmidl-${{ matrix.rid }}-symbols.zip
+          if-no-files-found: error
 
   vscode-extension:
     # GitHub-hosted runner (public-repo safety). NOTE: MSVC/Windows SDK discovery may need adjustment on first hosted run.
@@ -310,5 +331,7 @@ jobs:
           files: |
             artifacts/winmidl-win-x64/winmidl-win-x64.zip
             artifacts/winmidl-win-arm64/winmidl-win-arm64.zip
+            artifacts/winmidl-win-x64-symbols/winmidl-win-x64-symbols.zip
+            artifacts/winmidl-win-arm64-symbols/winmidl-win-arm64-symbols.zip
             artifacts/vscode-extension/midl-language.vsix
             artifacts/vs-extension/Midl.VsExtension.vsix

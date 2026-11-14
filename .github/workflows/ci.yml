@@ -25,6 +25,9 @@ jobs:
       - name: Test
         run: dotnet test --no-build --configuration Release --verbosity normal
 
+      - name: Test release symbol packaging
+        run: pwsh -NoProfile -File tests/release-symbols/test.ps1
+
       - name: Build VS Code Extension
         working-directory: editors/vscode
         run: |
