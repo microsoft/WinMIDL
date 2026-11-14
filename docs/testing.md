@@ -667,13 +667,11 @@ dotnet test --no-build
 - All warnings must be resolved (`TreatWarningsAsErrors` is enabled)
 - No new `MIDL1xxx` diagnostic codes without corresponding tests
 
-**Adding to CI for the VS Code extension (future):**
-```bash
-cd editors/vscode
-npm ci
-npx tsc -p . --noEmit   # Type-check only
-# npx @vscode/vsce package  # Verify packaging works
-```
+CI also builds and packages the VS Code extension. The `native-aot` job publishes
+the x64 server, packages the Visual Studio extension using
+`scripts/package-vs-vsix.ps1 -SkipBuild`, and runs `--version` on the server extracted
+from the VSIX. CI validates packaging without uploading artifacts; the release
+workflow packages the Visual Studio VSIX with both x64 and ARM64 servers.
 
 ---
 
