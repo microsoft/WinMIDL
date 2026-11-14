@@ -94,6 +94,7 @@ jobs:
           dotnet publish src/Midl.Cli -c Release -r ${{ matrix.rid }}
           --self-contained
           -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
           -p:Version=${{ steps.version.outputs.VERSION }}
           -p:AssemblyVersion=${{ steps.version.outputs.ASM_VERSION }}
           -p:FileVersion=${{ steps.version.outputs.ASM_VERSION }}
@@ -178,6 +179,57 @@ jobs:
         working-directory: editors/vscode
         run: npx @vscode/vsce publish --azure-credential
 
+  vs-extension:
+    runs-on: windows-latest
+    needs: publish
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Download win-x64 artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: winmidl-win-x64
+          path: artifacts/win-x64
+
+      - name: Download win-arm64 artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: winmidl-win-arm64
+          path: artifacts/win-arm64
+
+      - name: Build and verify Visual Studio extension
+        shell: pwsh
+        run: |
+          Expand-Archive artifacts/win-x64/winmidl-win-x64.zip -DestinationPath publish/win-x64
+          Expand-Archive artifacts/win-arm64/winmidl-win-arm64.zip -DestinationPath publish/win-arm64
+          $version = "${{ github.ref_name }}" -replace '^v', '' -replace '-.*$', ''
+          ./scripts/package-vs-vsix.ps1 -SkipBuild -Version $version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $vsix = [System.IO.Compression.ZipFile]::OpenRead("$env:GITHUB_WORKSPACE/publish/Midl.VsExtension.vsix")
+          try {
+            foreach ($path in @('server/win-x64/Midl.Cli.exe', 'server/win-arm64/Midl.Cli.exe')) {
+              if (-not $vsix.GetEntry($path)) { throw "VSIX is missing $path" }
+            }
+            $manifestEntry = $vsix.GetEntry('extension.vsixmanifest')
+            if (-not $manifestEntry) { throw 'VSIX is missing extension.vsixmanifest' }
+            $reader = [System.IO.StreamReader]::new($manifestEntry.Open())
+            try { [xml]$manifest = $reader.ReadToEnd() } finally { $reader.Dispose() }
+            if ($manifest.PackageManifest.Metadata.Identity.Version -ne $version) {
+              throw "VSIX manifest version does not match $version"
+            }
+          } finally {
+            $vsix.Dispose()
+          }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: vs-extension
+          path: publish/Midl.VsExtension.vsix
+          if-no-files-found: error
+
   nuget:
     # Publishes the dotnet tool package with Trusted Publishing: the job's OIDC token is
     # exchanged for a short-lived, single-use nuget.org key, so no API key is stored.
@@ -237,7 +289,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
-    needs: [publish, vscode-extension]
+    needs: [publish, vscode-extension, vs-extension]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -254,7 +306,9 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: true
+          fail_on_unmatched_files: true
           files: |
             artifacts/winmidl-win-x64/winmidl-win-x64.zip
             artifacts/winmidl-win-arm64/winmidl-win-arm64.zip
             artifacts/vscode-extension/midl-language.vsix
+            artifacts/vs-extension/Midl.VsExtension.vsix
