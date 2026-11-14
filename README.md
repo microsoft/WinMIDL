@@ -65,7 +65,8 @@ code --install-extension midl-language.vsix
 
 ### Visual Studio
 
-Install the **WinMIDL** extension for Visual Studio 2022+:
+Download `Midl.VsExtension.vsix` from the GitHub release and install the **WinMIDL**
+extension for Visual Studio 2022+:
 
 ```bash
 VSIXInstaller.exe Midl.VsExtension.vsix

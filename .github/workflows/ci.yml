@@ -66,7 +66,20 @@ jobs:
           Write-Host "Using MSVC $vcVersion from $vsPath, SDK $sv"
 
       - name: Publish NativeAOT
-        run: dotnet publish src/Midl.Cli -c Release -r win-x64 --self-contained -o publish/win-x64
+        run: dotnet publish src/Midl.Cli -c Release -r win-x64 --self-contained -p:PublishAot=true -o publish/win-x64
+
+      - name: Package Visual Studio VSIX (validate)
+        shell: pwsh
+        run: |
+          ./scripts/package-vs-vsix.ps1 -SkipBuild
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [System.IO.Compression.ZipFile]::ExtractToDirectory(
+            "$env:GITHUB_WORKSPACE/publish/Midl.VsExtension.vsix",
+            "$env:GITHUB_WORKSPACE/publish/vs-extension")
+          & ./publish/vs-extension/server/win-x64/Midl.Cli.exe --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload artifact
         if: false  # Artifacts are produced by the Release workflow; CI only validates the build
