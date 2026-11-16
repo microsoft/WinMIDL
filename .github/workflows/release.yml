@@ -118,13 +118,13 @@ jobs:
           Compress-Archive -Path $files.FullName -DestinationPath publish/winmidl-${{ matrix.rid }}.zip
 
       - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: winmidl-${{ matrix.rid }}
           path: publish/winmidl-${{ matrix.rid }}.zip
 
       - name: Upload debug symbols
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: winmidl-${{ matrix.rid }}-symbols
           path: publish/winmidl-${{ matrix.rid }}-symbols.zip
@@ -186,7 +186,7 @@ jobs:
           npx @vscode/vsce package -o ../../publish/midl-language.vsix
 
       - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: vscode-extension
           path: publish/midl-language.vsix
@@ -245,7 +245,7 @@ jobs:
           }
 
       - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: vs-extension
           path: publish/Midl.VsExtension.vsix
@@ -283,7 +283,7 @@ jobs:
           -o publish/nuget
 
       - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: nuget-package
           path: publish/nuget/*.nupkg
