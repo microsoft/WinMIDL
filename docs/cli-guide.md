@@ -25,6 +25,28 @@ Download the latest `winmidl-<version>.zip` from the [Releases](https://github.c
 
 Search for "MIDL" in the extension marketplace, or install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=AlexanderSklarMSFT.midl3-language-server).
 
+### Debugging a release server
+
+Releases include `winmidl-win-x64-symbols.zip` and `winmidl-win-arm64-symbols.zip`.
+Download the archive for the exact release and architecture of the crashing server,
+including when it is bundled in either editor extension. These contain PDBs from
+the same optimized build as the shipped executable, not a separate debug build.
+NativeAOT builds include the native server PDB; self-contained fallback builds
+include the managed PDBs for the server and its libraries. Symbols are not bundled
+in the executable downloads or VSIXes.
+
+Each symbol archive includes `manifest.json` with the source commit, build kind,
+and SHA-256 hashes of the executable and PDBs. Compare the executable hash with
+`Get-FileHash <path-to-Midl.Cli.exe> -Algorithm SHA256` before using the symbols.
+Check out the recorded commit to obtain the matching source. In WinDbg, add the
+extracted directory with `.sympath+ <symbols-directory>` and reload with `.reload /f`.
+For a managed fallback, use Visual Studio's managed dump debugging support or
+WinDbg with SOS and the matching .NET runtime debugging components.
+
+For crash reports, include the release version, architecture, executable hash,
+and reproduction steps. Memory dumps can contain source text, paths, and secrets;
+share them only through an approved private channel, not a public GitHub issue.
+
 ---
 
 ## Quick Start
