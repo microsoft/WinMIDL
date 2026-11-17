@@ -56,7 +56,7 @@ public sealed partial class MidlLanguageServer
         }
 
         return new DiagnosticReportResult(
-            ServerVersion: "0.1.0",
+            ServerVersion: "0.1.20",
             Platform: RuntimeInformation.OSDescription,
             Architecture: RuntimeInformation.OSArchitecture.ToString(),
             Runtime: RuntimeInformation.FrameworkDescription,

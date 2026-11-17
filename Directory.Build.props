@@ -1,5 +1,7 @@
 <Project>
   <PropertyGroup>
+    <!-- Shared package and binary version; release builds can override with /p:Version. -->
+    <Version Condition="'$(Version)' == ''">0.1.20</Version>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
