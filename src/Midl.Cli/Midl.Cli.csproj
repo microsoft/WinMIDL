@@ -18,10 +18,8 @@
     <Product>WinMIDL</Product>
     <Description>WinRT MIDL3 compiler — diagnostics, WinMD generation, header/proxy codegen, LSP server</Description>
     <Copyright>Copyright (c) Microsoft Corporation</Copyright>
-    <!-- Version set via /p:Version= from CI/CD or defaults to dev version -->
-    <Version Condition="'$(Version)' == ''">0.1.0-dev</Version>
-    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">0.1.0.0</AssemblyVersion>
-    <FileVersion Condition="'$(FileVersion)' == ''">0.1.0.0</FileVersion>
+    <!-- Version comes from Directory.Build.props (or /p:Version in release builds).
+         The SDK derives assembly, file, and informational versions from it. -->
 
     <!-- dotnet tool packaging -->
     <PackAsTool>true</PackAsTool>

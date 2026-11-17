@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.20 (2026-11-16)
+
+### Packaging and Debugging
+- Build the Visual Studio VSIX from the same x64 and ARM64 CLI binaries as the VS Code extension and standalone downloads, and attach it to GitHub releases (#116).
+- Publish separate `winmidl-win-x64-symbols.zip` and `winmidl-win-arm64-symbols.zip` assets containing matching CLI PDBs, the source commit, build kind, and executable/PDB SHA-256 hashes. Keep symbols out of executable downloads and VSIXes (#116).
+- Validate Visual Studio packaging and packaged x64 server startup in Windows CI; include native runtime libraries in the self-contained fallback (#116).
+- Align package, binary, extension, and language-server version metadata at 0.1.20.
+
 ## v0.1.19 (2026-09-04)
 
 ### Bug Fixes

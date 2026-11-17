@@ -822,7 +822,7 @@ public sealed partial class MidlLanguageServer
             ["serverInfo"] = new Dictionary<string, object?>
             {
                 ["name"] = "midl-language-server",
-                ["version"] = "0.1.0"
+                ["version"] = "0.1.20"
             }
         };
         await _writer.SendResponseAsync(id, capabilities);
