@@ -23,7 +23,7 @@
 
 .PARAMETER Version
     Version stamped into the binary (e.g. 0.1.18). Defaults to the version in the
-    project, which is 0.1.0-dev — matching what CI passes keeps a locally packaged
+    shared Directory.Build.props — matching what CI passes keeps a locally packaged
     binary from reporting a different version than the released one.
 #>
 

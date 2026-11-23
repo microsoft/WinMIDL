@@ -210,7 +210,7 @@ public class DiagnosticReportTests
 
         // Verify required fields
         Assert.True(result.TryGetProperty("serverVersion", out var ver));
-        Assert.Equal("0.1.0", ver.GetString());
+        Assert.Equal("0.1.20", ver.GetString());
 
         Assert.True(result.TryGetProperty("privateBytesMB", out _));
         Assert.True(result.TryGetProperty("workingSetMB", out _));
